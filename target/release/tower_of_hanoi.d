@@ -1,0 +1,1 @@
+C:\Users\molok\GitHub\tower_of_hanoi\target\release\tower_of_hanoi.exe: C:\Users\molok\GitHub\tower_of_hanoi\src\lib.rs C:\Users\molok\GitHub\tower_of_hanoi\src\list.rs C:\Users\molok\GitHub\tower_of_hanoi\src\main.rs
