@@ -1,19 +1,23 @@
 use tower_of_hanoi::list::List;
 
-
-
 fn main() {
     let towers: Vec<Vec<u8>> = vec![
-        vec![3, 2, 1],
-        vec![8, 6, 4],
-        vec![9, 7, 5]
+        vec![6, 4],
+        vec![5, 3, 1],
+        vec![2],
+        vec![],
+        vec![],
+        vec![],
     ];
     check_order(&towers);
     check_duplicate(&towers);
     let end: Vec<Vec<u8>> = vec![
-        vec![1],
-        vec![7, 6, 5, 4, 3, 2],
-        vec![9, 8]
+        vec![],
+        vec![],
+        vec![],
+        vec![],
+        vec![],
+        vec![6, 5, 4, 3, 2, 1],
     ];
     check_order(&end);
     check_duplicate(&end);
@@ -55,6 +59,9 @@ fn check_duplicate(towers: &Vec<Vec<u8>>) {
 }
 
 fn check_same_disks(start: &Vec<Vec<u8>>, end: &Vec<Vec<u8>>) {
+    if start.len() != end.len() {
+        panic!("Количество башен не совпадает");
+    }
     let mut first = Vec::new();
     let mut second = Vec::new();
 
@@ -80,53 +87,65 @@ fn check_same_disks(start: &Vec<Vec<u8>>, end: &Vec<Vec<u8>>) {
 pub fn breadth_search(start: &Vec<Vec<u8>>, end: Vec<Vec<u8>>) -> bool {
     let mut open: List = List::new_one(start.clone());
     let mut closed: List = List::new();
-    // let mut path: Vec<(usize, usize)> = Vec::new();
     let mut counter: i64 = -1;
     let mut found = false;
 
     while !open.is_empty() {
         counter += 1;
-        let x = open.pop_front().expect("Проблемы с pop_front");
+        let current_state = open.pop_front().expect("Проблемы с pop_front");
 
-        if x == end {
+        if current_state == end {
             println!("\nСделано {} шагов, верная башня:", counter);
-            print_towers(&x);
-            // print!("сделано {} шагов, {}", counter, create_path(path));
+            print_towers(&current_state);
             found = true;
             break;
         }
 
-        closed.push_back(x.clone());
+        closed.push_back(current_state.clone());
 
-        for row in 0..x.len() {
-            let mut clone = x.clone();
+        // Проходим по каждой башне текущего состояния и пытаемся достать верхний диск
+        for row in 0..current_state.len() {
+            let mut clone = current_state.clone();
+            // Тут мы достаем из копии текущего состояния верхний диск
             match clone[row].pop() {
+                // Если диска не существует, двигаем дальше
+                None => continue,
+                // Если диск существует смотрим куда его можно положить
                 Some(num) => {
-                    for row_clone in 0..x.len() {
+                    // Проверяем каждую башню куда поставить
+                    for row_clone in 0..current_state.len() {
                         let mut clone2 = clone.clone();
+                        // Кроме той башни, где лежал диск изначально
                         if row != row_clone {
-                            match x[row_clone].last() {
+                            // Смотрим чему равен последний элемент башни
+                            match current_state[row_clone].last() {
+                                // Если башня была пуста, просто кладем диск
+                                None => {
+                                    clone2[row_clone].push(num);
+                                }
+                                // Если башня не пустая смотрим какой диск больше
                                 Some(num_clone) => {
                                     if *num_clone > num {
+                                        // Если лежит диск больше нашего, кладем сверху наш
                                         clone2[row_clone].push(num);
                                     } else {
                                         continue;
                                     }
-                                },
-                                None => {
-                                    clone2[row_clone].push(num);
-                                },
+                                }
                             }
+                            // Проверяем, а существует ли такая комбинация уже в Closed или Open
                             if !(closed.exist(&clone2) || open.exist(&clone2)) {
-                                println!("Шаг {}:", counter);
-                                print_towers(&clone2);
-                                println!("#############################");
+                                // Раскомментировать, если нужны логи того, как это делается
+                                // println!("Шаг {}:", counter);
+                                // print_towers(&clone2);
+                                // println!("#############################");
+
+                                // Если не существует, добавляем
                                 open.push_back(clone2);
                             }
                         }
                     }
-                },
-                None => continue,
+                }
             };
         }
     }
@@ -135,7 +154,7 @@ pub fn breadth_search(start: &Vec<Vec<u8>>, end: Vec<Vec<u8>>) -> bool {
 
 fn print_towers(towers: &Vec<Vec<u8>>) {
     for (rods, rod) in towers.iter().enumerate() {
-        print!("Башня {}: ", rods+1);
+        print!("Башня {}: ", rods + 1);
         for disk in rod {
             print!("{} ", disk);
         }

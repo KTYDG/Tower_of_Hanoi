@@ -27,7 +27,9 @@ impl List {
         List { graph }
     }
     pub fn new_one(element: Vec<Vec<u8>>) -> List {
-        List { graph: vec![element] }
+        List {
+            graph: vec![element],
+        }
     }
     pub fn new() -> List {
         List { graph: vec![] }
